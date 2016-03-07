@@ -9,8 +9,6 @@ import scipy.io
 from skimage import io
 import glob
 
-
-
 MAT_TRAIN = '/imatge/jpan/work/training_copy.mat'
 MAT_VAL = '/imatge/jpan/work/validation.mat'
 MAT_TEST = '/imatge/jpan/work/testing.mat'
@@ -33,9 +31,9 @@ def loadnewSliencyMap(FILENAME):
     return saliency
 
 def loadSalicon():
-    NumSample = 9999;
+    NumSample = 99;
     X1 = np.zeros((NumSample, 3, 224, 224), dtype='float32')
-    y1 = np.zeros((NumSample,224,224), dtype='float32')
+    y1 = np.zeros((NumSample, 1, 224,224), dtype='float32')
     names = loadNameList(MAT_TRAIN,NumSample,'training')
     for i in range(NumSample):
         img = Image.open('/imatge/jpan/work/images/'+names[i]+'.jpg')
@@ -49,16 +47,17 @@ def loadSalicon():
         label = label -1.
         y1[i] = label#label.reshape(1,48*48)
 
-    data_to_save = (X1, y1)
-    #f = file('data_Salicon_T.cPickle', 'wb')
-    #pickle.dump(data_to_save, f, protocol=pickle.HIGHEST_PROTOCOL)
-    #f.close()  
-
-    f = open('data_Salicon_T.cPickle', 'wb')
-    pickle.dump([1,2,3], f, protocol=2)
-    np.save(f, data_to_save)
+    data_to_save = (X1,y1)
+    f = file('data_Salicon_T_img.cPickle', 'wb')
+    pickle.dump(data_to_save, f, protocol=pickle.HIGHEST_PROTOCOL)
     f.close()  
-        
+    '''  
+    data_to_save = y1
+    f = file('data_Salicon_T_sm.cPickle', 'wb')
+    pickle.dump(data_to_save, f, protocol=pickle.HIGHEST_PROTOCOL)
+    f.close() 
+ 
+    
     NumSample = 5000
     names = loadNameList(MAT_VAL,NumSample,'validation')
     X2 = np.zeros((NumSample, 3, 224, 224), dtype='float32')
@@ -81,14 +80,10 @@ def loadSalicon():
     y=np.append(y1,y2,axis=0)   
      
     data_to_save = (X, y)
-    #f = file('data_Salicon_TV.cPickle', 'wb')
-    #pickle.dump(data_to_save, f, protocol=pickle.HIGHEST_PROTOCOL)
-    #f.close()
-    f = open('data_Salicon_TV.cPickle', 'wb')
-    pickle.dump([1,2,3], f, protocol=2)
-    np.save(f, data_to_save)
+    f = file('data_Salicon_TV.cPickle', 'wb')
+    pickle.dump(data_to_save, f, protocol=pickle.HIGHEST_PROTOCOL)
     f.close()
-
+    '''
 def  main():
     loadSalicon()
 if __name__ == '__main__':

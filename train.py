@@ -54,7 +54,7 @@ def build_model():
     return net
 
 # Load model weights and metadata
-d = pickle.load(open('vgg16.pkl'))
+d = pickle.load(open('../vgg16.pkl'))
 
 # Build the network and fill with pretrained weights
 net = build_model()
@@ -66,50 +66,6 @@ IMAGE_MEAN = d['mean value'][:, np.newaxis, np.newaxis]
 
 # We need a fairly small batch size to fit a large network like this in GPU memory
 BATCH_SIZE = 16
-
-def prep_image(fn, ext='jpg'):
-    im = plt.imread(fn, ext)
-
-    # Resize so smallest dim = 256, preserving aspect ratio
-    h, w, _ = im.shape
-    if h < w:
-        im = skimage.transform.resize(im, (256, w*256/h), preserve_range=True)
-    else:
-        im = skimage.transform.resize(im, (h*256/w, 256), preserve_range=True)
-
-    # Central crop to 224x224
-    h, w, _ = im.shape
-    im = im[h//2-112:h//2+112, w//2-112:w//2+112]
-    
-    rawim = np.copy(im).astype('uint8')
-    
-    # Shuffle axes to c01
-    im = np.swapaxes(np.swapaxes(im, 1, 2), 0, 1)
-    
-    # discard alpha channel if present
-    im = im[:3]
-
-    # Convert to BGR
-    im = im[::-1, :, :]
-
-    im = im - IMAGE_MEAN
-    return rawim, floatX(im[np.newaxis])
-
-#Load and preprocess the entire dataset into numpy arrays
-
-def prep_data():
-    X = []
-    y = []
-
-    for cls in CLASSES:
-        for fn in os.listdir('./images/{}'.format(cls)):
-            _, im = prep_image('./images/{}/{}'.format(cls, fn))
-            X.append(im)
-            y.append(LABELS[cls])
-            
-    X = np.concatenate(X)
-    y = np.array(y).astype('int32')
-    return X,y
 
 # generator splitting an iterable into chunks of maximum length N
 def batches(iterable, N):
@@ -134,12 +90,6 @@ def val_batch():
     ix = ix[:BATCH_SIZE]
     return val_fn(X_val[ix], y_val[ix])
 
-def deprocess(im):
-    im = im[::-1, :, :]
-    im = np.swapaxes(np.swapaxes(im, 0, 1), 1, 2)
-    im = (im - im.min())
-    im = im / im.max()
-    return im
 
 class costum_loss():
     def kl_loss(fm,sm):
@@ -150,17 +100,12 @@ class costum_loss():
         return kl
 
 if __name__ == '__main__':
-    #main()
-    #X,y=prep_data()
-    #data_to_save = (X, y)
-    #pickle.dump(data_to_save, open('data.pkl', 'w'))
-    #X,y = cPickle .load(open('data_Salicon_T.cPickle'))
-    # Split into train, validation and test sets
 
-    f = file('data_Salicon_T.cPickle', 'rb')
+    f = file('data_Salicon_T_img.cPickle', 'rb')
     loaded_obj = cPickle.load(f)
     f.close()
-    X, y = loaded_obj
+    X,y = loaded_obj
+
 
     train_ix, test_ix = sklearn.cross_validation.train_test_split(range(len(y)))
     train_ix, val_ix = sklearn.cross_validation.train_test_split(range(len(train_ix)))
@@ -211,7 +156,7 @@ if __name__ == '__main__':
 
     params = lasagne.layers.get_all_params(net2['output_layer'], trainable=True)
     updates = lasagne.updates.nesterov_momentum(
-        loss, params, learning_rate=0.0001, momentum=0.9)
+        loss, params, learning_rate=0.001, momentum=0.9)
 
     # Compile functions for training, validation and prediction
     train_fn = theano.function([X_sym, y_sym], loss, updates=updates)
@@ -236,3 +181,5 @@ if __name__ == '__main__':
         loss_tot /= len(ix)
         acc_tot /= len(ix)
         print(epoch, loss_tot, acc_tot * 100) 
+        
+        
