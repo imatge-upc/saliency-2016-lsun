@@ -1,3 +1,7 @@
+'''
+    Some test with lasagne.
+    MLP and mnist dataset
+'''
 import numpy as np
 import lasagne
 import theano

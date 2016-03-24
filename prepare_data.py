@@ -1,7 +1,7 @@
 #Prepare data with '.cPickle' format, fast loading to memory
 import os
 import numpy as np
-import cPickle as pickle
+import cPickle 
 from PIL import Image
 from PIL import ImageOps
 from scipy import misc
@@ -31,7 +31,7 @@ def loadnewSliencyMap(FILENAME):
     return saliency
 
 def loadSalicon():
-    NumSample = 99;
+    NumSample = 9999;
     X1 = np.zeros((NumSample, 3, 224, 224), dtype='float32')
     y1 = np.zeros((NumSample, 1, 224,224), dtype='float32')
     names = loadNameList(MAT_TRAIN,NumSample,'training')
@@ -46,11 +46,23 @@ def loadSalicon():
         label = misc.imresize(label,(224,224)) / 127.5
         label = label -1.
         y1[i] = label#label.reshape(1,48*48)
+    for idx in range(9):
+        up_b = 1000*(idx+1)-1
+        low_b = 1000*idx
+        X = X1[low_b:up_b]
+        y = y1[low_b:up_b]
+        data_to_save = (X,y)
+        f = file('./train_data/data_Salicon_'+str(idx)+'.cPickle', 'wb')
+        cPickle.dump(data_to_save, f, protocol=cPickle.HIGHEST_PROTOCOL)
+        f.close()  
 
-    data_to_save = (X1,y1)
-    f = file('data_Salicon_T_img.cPickle', 'wb')
-    pickle.dump(data_to_save, f, protocol=pickle.HIGHEST_PROTOCOL)
-    f.close()  
+    X = X1[9000:9998]
+    y = y1[9000:9998]
+    data_to_save = (X,y)
+    f = file('./train_data/data_Salicon_9.cPickle', 'wb')
+    cPickle.dump(data_to_save, f, protocol=cPickle.HIGHEST_PROTOCOL)
+    f.close()      
+
     '''  
     data_to_save = y1
     f = file('data_Salicon_T_sm.cPickle', 'wb')
