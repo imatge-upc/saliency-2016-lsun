@@ -2,3 +2,8 @@
 *.cPickle
 *.pickle
 *.ipynb
+*.pyc
+/model/*
+/salicon_data/*
+/utils/*
+*.png

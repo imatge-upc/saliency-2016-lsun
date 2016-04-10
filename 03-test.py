@@ -182,7 +182,7 @@ if __name__ == "__main__":
 	
 	# Load data
 	print 'Loading validation data...'
-	with open( 'validationData.pickle', 'rb') as f:
+	with open( './salicon_data/validationData.pickle', 'rb') as f:
 		validationData = pickle.load( f )       
 	print '-->done!'
 
@@ -198,9 +198,9 @@ if __name__ == "__main__":
 
 	net = buildNetwork(height,width,inputImage)
 	
-	epochToLoad = 0
+	epochToLoad = 48
 	
-	with np.load("modelWights{:04d}.npz".format(epochToLoad)) as f:
+	with np.load("./model/modelWights{:04d}.npz".format(epochToLoad)) as f:
 		param_values = [f['arr_%d' % i] for i in range(len(f.files))]
 	lasagne.layers.set_all_param_values(net['output'], param_values)
 

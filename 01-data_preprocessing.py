@@ -6,19 +6,20 @@ from scipy import misc
 import scipy.io
 from skimage import io
 import cv2
-import Image
+#import Image
 import sys
 import cPickle as pickle
 import glob
 import random
 from tqdm import tqdm
 from eliaLib import dataRepresentation
+import file_dir as file_dir
 
-pathToImages = '/home/crcanton/data/Datasets/Saliency/salicon/images'
-pathToMaps = '/home/crcanton/data/Datasets/Saliency/salicon/saliency'
+pathToImages = file_dir.pathToImages
+pathToMaps = file_dir.pathToMaps
 
-pathOutputImages = '/home/crcanton/data/Datasets/Saliency/salicon/images256x192'
-pathOutputMaps = '/home/crcanton/data/Datasets/Saliency/salicon/saliency256x192'
+pathOutputImages = file_dir.pathOutputImages
+pathOutputMaps = file_dir.pathOutputMaps
 
 ## Resize train/validation files
 

@@ -16,6 +16,8 @@ import lasagne
 from lasagne.layers import InputLayer, DenseLayer, NonlinearityLayer,InverseLayer
 from lasagne.layers import Conv2DLayer as ConvLayer
 from lasagne.layers import Pool2DLayer as PoolLayer
+#from lasagne.layers.cuda_convnet import Conv2DCCLayer as ConvLayer
+#from lasagne.layers.cuda_convnet import MaxPool2DCCLayer as PoolLayer
 from lasagne.nonlinearities import softmax
 from lasagne.utils import floatX
 
@@ -26,6 +28,10 @@ from lasagne.layers import Conv2DLayer
 from lasagne.layers import MaxPool2DLayer
 from lasagne.layers import Upscale2DLayer
 from lasagne.nonlinearities import softmax
+
+import file_dir as file_dir
+
+pathToImagesPickle = file_dir.pathToImagesPickle
 
 def buildNetwork( inputWidth, inputHeight, input_var=None ):
     net = {}
@@ -182,7 +188,7 @@ if __name__ == "__main__":
 	
 	# Load data
 	print 'Loading training data...'
-	with open( 'trainData.pickle', 'rb') as f:
+	with open( pathToImagesPickle, 'rb') as f:
 		trainData = pickle.load( f )    
 	print '-->done!'
 
@@ -245,8 +251,8 @@ if __name__ == "__main__":
 				continue
 
 			for k in range( batchSize ):
-				batchIn[k,...] = (trainData[k].image.data.astype(theano.config.floatX).transpose(2,0,1)-imageMean)/255.
-				batchOut[k,...] = (trainData[k].saliency.data.astype(theano.config.floatX))/255.
+				batchIn[k,...] = (currChunk[k].image.data.astype(theano.config.floatX).transpose(2,0,1)-imageMean)/255.
+				batchOut[k,...] = (currChunk[k].saliency.data.astype(theano.config.floatX))/255.
 			err += train_fn( batchIn, batchOut)
 		print 'Epoch:', currEpoch, ' ->', err
-		np.savez( "modelWights{:04d}.npz".format(currEpoch), *lasagne.layers.get_all_param_values(net['output']))
+		np.savez( "./model/modelWights{:04d}.npz".format(currEpoch), *lasagne.layers.get_all_param_values(net['output']))
