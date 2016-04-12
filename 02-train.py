@@ -5,6 +5,7 @@ import sys
 import cPickle as pickle
 import glob
 import random
+import time
 from tqdm import tqdm
 from eliaLib import dataRepresentation
 import matplotlib.pyplot as plt
@@ -201,7 +202,7 @@ if __name__ == "__main__":
 	height = 192
 
 	net = buildNetwork(height,width,inputImage)
-	d = pickle.load(open('vgg16.pkl'))
+	d = pickle.load(open('imageNet_VGG16.pkl'))
 	numElementsToSet = 26 # Number of W and b elements for the first convolutional layers
 	lasagne.layers.set_all_param_values(net['pool5'], d['param values'][:numElementsToSet])
 
@@ -234,7 +235,8 @@ if __name__ == "__main__":
 	batchIn = np.zeros((batchSize, 3, height, width ), theano.config.floatX )
 	batchOut = np.zeros((batchSize, 1, height, width ), theano.config.floatX )
 
-	for currEpoch in tqdm(range(numEpochs)):
+	for currEpoch in tqdm(range(numEpochs), ncols=20):
+		
 		random.shuffle( trainData )
 
 		err = 0.
