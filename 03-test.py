@@ -198,9 +198,9 @@ if __name__ == "__main__":
 
 	net = buildNetwork(height,width,inputImage)
 	
-	epochToLoad = 48
+	epochToLoad = 14
 	
-	with np.load("./model/modelWights{:04d}.npz".format(epochToLoad)) as f:
+	with np.load("modelWights{:04d}.npz".format(epochToLoad)) as f:
 		param_values = [f['arr_%d' % i] for i in range(len(f.files))]
 	lasagne.layers.set_all_param_values(net['output'], param_values)
 

@@ -6,5 +6,7 @@
 /model/*
 /salicon_data/*
 /utils/*
+/cnn_models/*
 *.png
 *.npz
+
