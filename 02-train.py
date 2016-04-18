@@ -14,10 +14,13 @@ import theano.tensor as T
 import lasagne
 
 from lasagne.layers import InputLayer, DenseLayer, NonlinearityLayer,InverseLayer
-from lasagne.layers import Conv2DLayer as ConvLayer
-from lasagne.layers import Pool2DLayer as PoolLayer
+#from lasagne.layers import Conv2DLayer as ConvLayer
+#from lasagne.layers import Pool2DLayer as PoolLayer
 #from lasagne.layers.cuda_convnet import Conv2DCCLayer as ConvLayer
 #from lasagne.layers.cuda_convnet import MaxPool2DCCLayer as PoolLayer
+from lasagne.layers.dnn import Conv2DDNNLayer as ConvLayer
+from lasagne.layers.dnn import Pool2DDNNLayer as PoolLayer
+
 from lasagne.nonlinearities import softmax
 from lasagne.utils import floatX
 
@@ -178,6 +181,15 @@ def buildNetwork( inputWidth, inputHeight, input_var=None ):
 
     return net
 
+class costum_loss():
+
+    def kl_loss(self,fm,sm):
+        epsilon = 0.000001
+        Sm = sm / (T.sum(sm,axis=[0,1]) + epsilon)
+        Fm = fm / (T.sum(fm,axis=[0,1]) + epsilon)
+        kl =  T.sum(T.log(Fm / (Sm + epsilon)+epsilon),axis =[0,1])
+        return kl
+
 def chunks(l, n):
     """Yield successive n-sized chunks from l."""
     for i in xrange(0, len(l), n):
@@ -185,74 +197,78 @@ def chunks(l, n):
         yield l[i:i+n]
 
 if __name__ == "__main__":
-	
-	# Load data
-	print 'Loading training data...'
-	with open( pathToImagesPickle, 'rb') as f:
-		trainData = pickle.load( f )    
-	print '-->done!'
 
-	# with open( 'validationData.pickle', 'rb') as f:
-		# validationData = pickle.load( f )       
+    # Load data
+    print 'Loading training data...'
+    with open( pathToImagesPickle, 'rb') as f:
+        trainData = pickle.load( f )    
+    print '-->done!'
 
-	# with open( 'testData.pickle', 'rb') as f:
-		# testData = pickle.load( f )   
+    # with open( 'validationData.pickle', 'rb') as f:
+        # validationData = pickle.load( f )       
+
+    # with open( 'testData.pickle', 'rb') as f:
+        # testData = pickle.load( f )   
 
 
-	# Create network
-	inputImage = T.tensor4()
-	outputSaliency = T.tensor4()
+    # Create network
+    inputImage = T.tensor4()
+    outputSaliency = T.tensor4()
 
-	width = 256
-	height = 192
+    width = 256
+    height = 192
 
-	net = buildNetwork(height,width,inputImage)
-	d = pickle.load(open('vgg16.pkl'))
-	numElementsToSet = 26 # Number of W and b elements for the first convolutional layers
-	lasagne.layers.set_all_param_values(net['pool5'], d['param values'][:numElementsToSet])
+    net = buildNetwork(height,width,inputImage)
+    d = pickle.load(open('vgg16.pkl'))
+    numElementsToSet = 26 # Number of W and b elements for the first convolutional layers
+    lasagne.layers.set_all_param_values(net['pool5'], d['param values'][:numElementsToSet])
 
-	prediction = lasagne.layers.get_output(net['output'])
-	test_prediction = lasagne.layers.get_output(net['output'], deterministic=True)
-	loss = lasagne.objectives.squared_error(prediction, outputSaliency)
-	loss = loss.mean()
+    prediction = lasagne.layers.get_output(net['output'])
+    test_prediction = lasagne.layers.get_output(net['output'], deterministic=True)
+    #loss = lasagne.objectives.squared_error(prediction, outputSaliency)
+    the_costum_loss = costum_loss()
+    loss = the_costum_loss.kl_loss(prediction, outputSaliency)
+    loss = loss.mean()
 
-	init_learningrate = 0.01
-	momentum = 0.0 # start momentum at 0.0
-	max_momentum = 0.9
-	min_learningrate = 0.00001
-	lr = theano.shared(np.array(init_learningrate, dtype=theano.config.floatX))
-	mm = theano.shared(np.array(momentum, dtype=theano.config.floatX))
+    init_learningrate = 0.01
+    momentum = 0.0 # start momentum at 0.0
+    max_momentum = 0.9
+    min_learningrate = 0.00001
+    lr = theano.shared(np.array(init_learningrate, dtype=theano.config.floatX))
+    mm = theano.shared(np.array(momentum, dtype=theano.config.floatX))
 
-	# Let's only train the trainable layers (i.e. the deconvolutional part, check buildNetwork() function)
-	params = lasagne.layers.get_all_params(net['output'], trainable=True)
+    # Let's only train the trainable layers (i.e. the deconvolutional part, check buildNetwork() function)
+    params = lasagne.layers.get_all_params(net['output'], trainable=True)
 
-	updates_sgd = lasagne.updates.sgd(loss, params, learning_rate = lr)
-	updates = lasagne.updates.apply_momentum(updates_sgd, params, momentum = mm) 
+    updates_sgd = lasagne.updates.sgd(loss, params, learning_rate = lr)
+    updates = lasagne.updates.apply_momentum(updates_sgd, params, momentum = mm) 
 
-	train_fn = theano.function([inputImage, outputSaliency], loss, updates=updates, allow_input_downcast=True)
-	predict_fn = theano.function([inputImage], test_prediction)
+    train_fn = theano.function([inputImage, outputSaliency], loss, updates=updates, allow_input_downcast=True)
+    predict_fn = theano.function([inputImage], test_prediction)
 
-	imageMean = d['mean value'][:, np.newaxis, np.newaxis]
+    imageMean = d['mean value'][:, np.newaxis, np.newaxis]
 
-	batchSize = 64
-	numEpochs = 50
+    batchSize = 64
+    numEpochs = 50
 
-	batchIn = np.zeros((batchSize, 3, height, width ), theano.config.floatX )
-	batchOut = np.zeros((batchSize, 1, height, width ), theano.config.floatX )
 
-	for currEpoch in tqdm(range(numEpochs)):
-		random.shuffle( trainData )
+    batchIn = np.zeros((batchSize, 3, height, width ), theano.config.floatX )
+    batchOut = np.zeros((batchSize, 1, height, width ), theano.config.floatX )
 
-		err = 0.
-		
-		for currChunk in chunks(trainData, batchSize):
+    for currEpoch in tqdm(range(numEpochs)):
+        random.shuffle( trainData )
 
-			if len(currChunk) != batchSize:
-				continue
+        err = 0.
+        
+        for currChunk in chunks(trainData, batchSize):
 
-			for k in range( batchSize ):
-				batchIn[k,...] = (currChunk[k].image.data.astype(theano.config.floatX).transpose(2,0,1)-imageMean)/255.
-				batchOut[k,...] = (currChunk[k].saliency.data.astype(theano.config.floatX))/255.
-			err += train_fn( batchIn, batchOut)
-		print 'Epoch:', currEpoch, ' ->', err
-		np.savez( "./model/modelWights{:04d}.npz".format(currEpoch), *lasagne.layers.get_all_param_values(net['output']))
+            if len(currChunk) != batchSize:
+                continue
+
+            for k in range( batchSize ):
+                batchIn[k,...] = (currChunk[k].image.data.astype(theano.config.floatX).transpose(2,0,1)-imageMean)/255.
+                batchOut[k,...] = (currChunk[k].saliency.data.astype(theano.config.floatX))/255.
+            err += train_fn( batchIn, batchOut)
+        print 'Epoch:', currEpoch, ' ->', err
+        if currEpoch % 10 :
+            np.savez( "modelWights{:04d}.npz".format(currEpoch), *lasagne.layers.get_all_param_values(net['output']))

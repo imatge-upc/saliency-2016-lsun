@@ -1,0 +1,17 @@
+
+ROOT_DIR = '../data/';
+
+IMAGE_DIR = [ROOT_DIR 'images/'];
+SALIENCY_DIR = [ROOT_DIR 'saliency/'];
+FIXATION_DIR = [ROOT_DIR 'fixation/'];
+
+METRIC_DIR = 'code_forMetrics';
+
+IMAGE_PATTERN = [IMAGE_DIR '%s' '.jpg'];
+SALIENCY_PATTERN = [SALIENCY_DIR '%s' '.mat'];
+FIXATION_PATTERN = [FIXATION_DIR '%s' '.mat'];
+CENTRAL_PATH = './center.mat';
+	
+TRAIN_DATA_PATH = [ROOT_DIR 'training.mat'];
+VALIDATION_DATA_PATH = [ROOT_DIR 'validation.mat'];
+TEST_DATA_PATH = [ROOT_DIR 

@@ -7,3 +7,4 @@
 /salicon_data/*
 /utils/*
 *.png
+*.npz
