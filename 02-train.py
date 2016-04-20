@@ -31,7 +31,7 @@ if __name__ == "__main__":
     model = dnnModel.Model(1000)
     model.build( inputImage, outputSaliency )
 
-    batchSize = 64
+    batchSize = 40
     numEpochs = 50
 
     

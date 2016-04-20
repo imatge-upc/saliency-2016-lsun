@@ -13,24 +13,15 @@ import theano.tensor as T
 import lasagne
 
 from lasagne.layers import InputLayer, DenseLayer, NonlinearityLayer,InverseLayer
-from lasagne.layers import Conv2DLayer 
+from lasagne.layers import Conv2DLayer, Upscale2DLayer, DropoutLayer
 from lasagne.layers import Pool2DLayer
 from lasagne.layers.dnn import Conv2DDNNLayer as ConvLayer
 from lasagne.layers.dnn import Pool2DDNNLayer as PoolLayer
 from lasagne.layers import MaxPool2DLayer, LocalResponseNormalization2DLayer
 from lasagne.layers import SliceLayer, concat, DenseLayer
 
-from lasagne.nonlinearities import softmax
+from lasagne.nonlinearities import softmax, rectify
 from lasagne.utils import floatX
-
-from lasagne.layers import DenseLayer
-from lasagne.layers import InputLayer
-from lasagne.layers import DropoutLayer
-from lasagne.layers import Conv2DLayer
-from lasagne.layers import MaxPool2DLayer
-from lasagne.layers import Upscale2DLayer
-from lasagne.nonlinearities import softmax
-from lasagne.nonlinearities import rectify
 
 import file_dir as file_dir
 

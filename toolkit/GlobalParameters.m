@@ -5,7 +5,7 @@ IMAGE_DIR = [ROOT_DIR 'images/'];
 SALIENCY_DIR = [ROOT_DIR 'saliency/'];
 FIXATION_DIR = [ROOT_DIR 'fixation/'];
 
-VAL_TEST_DIR = ['/imatge/jpan/work/lsun2016/results/10-04-2016/'];
+VAL_TEST_DIR = ['/imatge/jpan/work/lsun2016/results/19-04-2016/'];
 
 METRIC_DIR = 'code_forMetrics';
 

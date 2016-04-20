@@ -3,14 +3,6 @@ import sys
 caffe_root = '/usr/local/opt/caffe-2015-10/'  # this file is expected to be in {caffe_root}/examples
 sys.path.insert(0, caffe_root + 'python')
 import caffe
-    
-
-#Caffe reference model lasagne implementation
-#http://caffe.berkeleyvision.org/
-#License: non-commercial use only
-
-# Pretrained weights (233M) can be downloaded from:
-# https://s3.amazonaws.com/lasagne/recipes/pretrained/imagenet/caffe_reference.pkl
 
 from lasagne.layers import InputLayer, Conv2DLayer
 from lasagne.layers import MaxPool2DLayer, LocalResponseNormalization2DLayer
@@ -138,34 +130,11 @@ def build_model():
     return net
 
 def load_caffe():
-    """
-    Loads the parameters for the caffe reference model.
-    Also checks to make sure the two models produce equivalent
-    results. The ouput model is saved to caffe_reference.pkl
-
-    Before running this, you need to install caffe and change
-    the caffe_root variable to point to your installation.
-
-    http://caffe.berkeleyvision.org/
-    """
 
     import cPickle as pickle
     import lasagne
     import numpy as np
     from lasagne.utils import floatX
-    '''
-    # Make sure that caffe is on the python path:
-    caffe_root = '../../caffe/'
-    import sys
-    sys.path.insert(0, caffe_root + 'python')
-    import caffe
-    
-    # load caffenet
-    caffe.set_mode_cpu()
-    caffe_net = caffe.Net(caffe_root + 'models/bvlc_reference_caffenet/deploy.prototxt',
-                    caffe_root + 'models/bvlc_reference_caffenet/bvlc_reference_caffenet.caffemodel',
-                    caffe.TEST)
-	'''
 
     specfile = '/imatge/jpan/lsun2016/saliency-2016-lsun/cnn_models/places/places205CNN_deploy.prototxt'
     modelfile = '/imatge/jpan/lsun2016/saliency-2016-lsun/cnn_models/places/places205CNN_iter_300000.caffemodel'

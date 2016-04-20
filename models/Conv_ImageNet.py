@@ -219,7 +219,10 @@ class Model:
 		net['pool5'] = MaxPool2DLayer(net['conv5'], pool_size=(3, 3), stride = 2)
 		print "pool5: {}".format(net['pool5'].output_shape[1:]) 
 
-		#Adaptive stage
+		#################
+		# Adaptive stage
+		#################
+		
 		net['apool5'] = InverseLayer(net['pool5'],net['pool5'])
 		print "upool5: {}".format(net['apool5'].output_shape[1:])
 
@@ -230,6 +233,100 @@ class Model:
 		numElementsToSet = 16
 		lasagne.layers.set_all_param_values(net['pool5'], d[:numElementsToSet])
 
+		return net
+
+	def buildInputNetwork_VGG_Faces( self, input_layer, input_var=None ):
+		net = {}
+		#net['input'] = InputLayer((None, 3, inputHeight, inputWidth ), input_var=input_var)
+		net['input'] = input_layer
+ 		print "Input: {}".format(net['input'].output_shape[1:])
+		
+		net['conv1_1'] = ConvLayer(net['input'], 64, 3, pad=1)
+		net['conv1_1'].add_param(net['conv1_1'].W, net['conv1_1'].W.get_value().shape, trainable=False)
+		net['conv1_1'].add_param(net['conv1_1'].b, net['conv1_1'].b.get_value().shape, trainable=False)
+		print "Input: {}".format(net['conv1_1'].output_shape[1:])
+		
+		net['conv1_2'] = ConvLayer(net['conv1_1'], 64, 3, pad=1)
+		net['conv1_2'].add_param(net['conv1_2'].W, net['conv1_2'].W.get_value().shape, trainable=False)
+		net['conv1_2'].add_param(net['conv1_2'].b, net['conv1_2'].b.get_value().shape, trainable=False)
+		print "Input: {}".format(net['conv1_2'].output_shape[1:])
+		
+		net['pool1'] = PoolLayer(net['conv1_2'], 2)
+		print "Input: {}".format(net['pool1'].output_shape[1:])
+		
+		net['conv2_1'] = ConvLayer(net['pool1'], 128, 3, pad=1)
+		net['conv2_1'].add_param(net['conv2_1'].W, net['conv2_1'].W.get_value().shape, trainable=False)
+		net['conv2_1'].add_param(net['conv2_1'].b, net['conv2_1'].b.get_value().shape, trainable=False)
+		print "Input: {}".format(net['conv2_1'].output_shape[1:])
+		
+		net['conv2_2'] = ConvLayer(net['conv2_1'], 128, 3, pad=1)
+		net['conv2_2'].add_param(net['conv2_2'].W, net['conv2_2'].W.get_value().shape, trainable=False)
+		net['conv2_2'].add_param(net['conv2_2'].b, net['conv2_2'].b.get_value().shape, trainable=False)
+		print "Input: {}".format(net['conv2_2'].output_shape[1:])
+		
+		net['pool2'] = PoolLayer(net['conv2_2'], 2)
+		print "Input: {}".format(net['pool2'].output_shape[1:])
+		
+		net['conv3_1'] = ConvLayer(net['pool2'], 256, 3, pad=1)
+		net['conv3_1'].add_param(net['conv3_1'].W, net['conv3_1'].W.get_value().shape, trainable=False)
+		net['conv3_1'].add_param(net['conv3_1'].b, net['conv3_1'].b.get_value().shape, trainable=False)
+		print "Input: {}".format(net['conv3_1'].output_shape[1:])
+		
+		net['conv3_2'] = ConvLayer(net['conv3_1'], 256, 3, pad=1)
+		net['conv3_2'].add_param(net['conv3_2'].W, net['conv3_2'].W.get_value().shape, trainable=False)
+		net['conv3_2'].add_param(net['conv3_2'].b, net['conv3_2'].b.get_value().shape, trainable=False)
+		print "Input: {}".format(net['conv3_2'].output_shape[1:])
+		
+		net['conv3_3'] = ConvLayer(net['conv3_2'], 256, 3, pad=1)
+		net['conv3_3'].add_param(net['conv3_3'].W, net['conv3_3'].W.get_value().shape, trainable=False)
+		net['conv3_3'].add_param(net['conv3_3'].b, net['conv3_3'].b.get_value().shape, trainable=False)
+		print "Input: {}".format(net['conv3_3'].output_shape[1:])
+		
+		net['pool3'] = PoolLayer(net['conv3_3'], 2)
+		print "Input: {}".format(net['pool3'].output_shape[1:])
+		
+		net['conv4_1'] = ConvLayer(net['pool3'], 512, 3, pad=1)
+		net['conv4_1'].add_param(net['conv4_1'].W, net['conv4_1'].W.get_value().shape, trainable=False)
+		net['conv4_1'].add_param(net['conv4_1'].b, net['conv4_1'].b.get_value().shape, trainable=False)
+		print "Input: {}".format(net['conv4_1'].output_shape[1:])
+		
+		net['conv4_2'] = ConvLayer(net['conv4_1'], 512, 3, pad=1)
+		net['conv4_2'].add_param(net['conv4_2'].W, net['conv4_2'].W.get_value().shape, trainable=False)
+		net['conv4_2'].add_param(net['conv4_2'].b, net['conv4_2'].b.get_value().shape, trainable=False)
+		print "Input: {}".format(net['conv4_2'].output_shape[1:])
+		
+		net['conv4_3'] = ConvLayer(net['conv4_2'], 512, 3, pad=1)
+		net['conv4_3'].add_param(net['conv4_3'].W, net['conv3_1'].W.get_value().shape, trainable=False)
+		net['conv4_3'].add_param(net['conv4_3'].b, net['conv4_3'].b.get_value().shape, trainable=False)
+		print "Input: {}".format(net['conv4_3'].output_shape[1:])
+		
+		net['pool4'] = PoolLayer(net['conv4_3'], 2)
+		print "Input: {}".format(net['pool4'].output_shape[1:])
+		
+		net['conv5_1'] = ConvLayer(net['pool4'], 512, 3, pad=1)
+		net['conv5_1'].add_param(net['conv5_1'].W, net['conv5_1'].W.get_value().shape, trainable=False)
+		net['conv5_1'].add_param(net['conv5_1'].b, net['conv5_1'].b.get_value().shape, trainable=False)
+		print "Input: {}".format(net['conv5_1'].output_shape[1:])
+		
+		net['conv5_2'] = ConvLayer(net['conv5_1'], 512, 3, pad=1)
+		net['conv5_2'].add_param(net['conv5_2'].W, net['conv5_2'].W.get_value().shape, trainable=False)
+		net['conv5_2'].add_param(net['conv5_2'].b, net['conv5_2'].b.get_value().shape, trainable=False)
+		print "Input: {}".format(net['conv5_2'].output_shape[1:])
+		
+		net['conv5_3'] = ConvLayer(net['conv5_2'], 512, 3, pad=1)
+		net['conv5_3'].add_param(net['conv5_3'].W, net['conv5_3'].W.get_value().shape, trainable=False)
+		net['conv5_3'].add_param(net['conv5_3'].b, net['conv5_3'].b.get_value().shape, trainable=False)
+		print "Input: {}".format(net['conv5_3'].output_shape[1:])
+		
+		net['pool5'] = PoolLayer(net['conv5_3'], 2)
+		print "Input: {}".format(net['pool5'].output_shape[1:])
+		
+		# Set out weights 
+		d = pickle.load(open('/imatge/jpan/lsun2016/saliency-2016-lsun/vgg16_faces.pkl'))
+		numElementsToSet = 26 # Number of W and b elements for the first convolutional layers
+		lasagne.layers.set_all_param_values(net['pool5'], d[:numElementsToSet])
+		
+		
 		return net
 
 	def buildOutputNetwork( self, input_stage ):
@@ -305,7 +402,13 @@ class Model:
 
 		alexNet = self.buildInputNetwork_AlexNet_Places( input_layer,input_var )
 
-		input_stage = concat((vggNet['pool5'],alexNet['aconv2']),axis=1)
+		vggNet_faces = self.buildInputNetwork_VGG_Faces( input_layer,input_var )
+
+		input_stage = concat((vggNet['pool5'],alexNet['aconv2'],vggNet_faces['pool5']),axis=1)
+		
+		print "################"
+		print "input_stage: {}".format(input_stage.output_shape[1:])
+		print "################"
 
 		self.net = self.buildOutputNetwork( input_stage )
 
