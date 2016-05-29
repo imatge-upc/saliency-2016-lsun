@@ -32,15 +32,15 @@ if __name__ == "__main__":
     model = dnnModel.Model(1000)
     model.build(inputImage, outputSaliency)
 
-    batchSize = 64
-    numEpochs = 91
+    batchSize = 32
+    numEpochs = 181
 
     batchIn = np.zeros((batchSize, 3, model.inputHeight, model.inputWidth), theano.config.floatX)
     batchOut = np.zeros((batchSize, 1, model.inputHeight, model.inputWidth), theano.config.floatX)
 
     # Load data
     print 'Loading training data...'
-    with open('./salicon_data/trainData.pickle', 'rb') as f:
+    with open('/scratch/local/jpang/salicon_data/trainData.pickle', 'rb') as f:
         trainData = pickle.load(f)
     print '-->done!'
 
@@ -69,10 +69,19 @@ if __name__ == "__main__":
                                                                                                   1) - model.meanImage_VGG_ImageNet) / 255.
                 batchOut[k, ...] = (currChunk[k].saliency.data.astype(theano.config.floatX)) / 255.
             err += model.trainFunction(batchIn, batchOut)
-            model.currentLearningRate.set_value(model.currentLearningRate.get_value() * model.lrDecay)
+            # model.currentLearningRate.set_value(model.currentLearningRate.get_value() * model.lrDecay)
 
         print 'Epoch:', currEpoch, ' ->', err
-        # np.savez( "modelWeights{:04d}.npz".format(currEpoch), *lasagne.layers.get_all_param_values(model.net['output']))
-        if currEpoch % 10 == 0:
-            np.savez("./model/modelWeights{:04d}.npz".format(currEpoch),
-                     *lasagne.layers.get_all_param_values(model.net['output']))
+
+        if currEpoch % 30 == 0:
+            np.savez("./model/img_places_conv456/modelWeights{:04d}.npz".format(currEpoch),
+                    *lasagne.layers.get_all_param_values(model.net['output']))
+
+            # np.savez("./model/img_places_conv45/modelWeights{:04d}.npz".format(currEpoch),
+            #        *lasagne.layers.get_all_param_values(model.net['output']))
+
+            #np.savez("./model/img_places_faces_conv5/modelWeights{:04d}.npz".format(currEpoch),
+            #         *lasagne.layers.get_all_param_values(model.net['output']))
+
+            # np.savez("./model/modelWeights{:04d}.npz".format(currEpoch),
+            #         *lasagne.layers.get_all_param_values(model.net['output']))
