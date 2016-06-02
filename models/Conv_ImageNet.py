@@ -14,6 +14,7 @@ from lasagne.layers import DropoutLayer
 from lasagne.layers import Conv2DLayer
 from lasagne.layers import MaxPool2DLayer
 from lasagne.layers import Upscale2DLayer
+from lasagne.layers import TransposedConv2DLayer
 from lasagne.nonlinearities import softmax, rectify
 from lasagne.layers import MaxPool2DLayer, LocalResponseNormalization2DLayer
 from lasagne.layers import SliceLayer, concat, DenseLayer
@@ -59,7 +60,7 @@ class Model:
         self.inputHeight = 192
 
         self.initialLearningRate = 0.01
-        self.initialMomentum = 0.0  # start momentum at 0.0
+        self.initialMomentum = 0.9  # start momentum at 0.0
         self.maxMomentum = 0.9
         self.minLearningRate = 0.00001
 
@@ -418,57 +419,130 @@ class Model:
 
         return inputNetwork
 
-    def buildOutputNetwork_M(self, input_network):
-        outputNetwork = {}
+    def buildOutputNetwork_S(self, input_stage):
+        inputNetwork = {}
 
-        outputNetwork['upool1'] = Upscale2DLayer(input_network['conv5_3'], scale_factor=4)
-        print "upool1: {}".format(outputNetwork['upool1'].output_shape[1:])
+        inputNetwork['uconv5_3'] = ConvLayer(input_stage, 512, 3, pad=1)
+        print "uconv5_3: {}".format(inputNetwork['uconv5_3'].output_shape[1:])
 
-        outputNetwork['upool2'] = Upscale2DLayer(input_network['conv4_3'], scale_factor=2)
-        print "upool2: {}".format(outputNetwork['upool2'].output_shape[1:])
+        inputNetwork['uconv5_2'] = ConvLayer(inputNetwork['uconv5_3'], 512, 3, pad=1)
+        print "uconv5_2: {}".format(inputNetwork['uconv5_2'].output_shape[1:])
 
-        outputNetwork['concat'] = concat((outputNetwork['upool1'], outputNetwork['upool2'],
-                                          input_network['conv3_3']), axis=1)
-        print "concat: {}".format(outputNetwork['concat'].output_shape[1:])
+        inputNetwork['uconv5_1'] = ConvLayer(inputNetwork['uconv5_2'], 512, 3, pad=1)
+        print "uconv5_1: {}".format(inputNetwork['uconv5_1'].output_shape[1:])
 
-        outputNetwork['conv1_1'] = ConvLayer(outputNetwork['concat'], 512, 3, pad=1)
-        print "conv1_1: {}".format(outputNetwork['conv1_1'].output_shape[1:])
+        # inputNetwork['upool4'] = TransposedConv2DLayer(inputNetwork['uconv5_1'], 512, 2, stride=2)
+        # print "upool4: {}".format(inputNetwork['upool4'].output_shape[1:])
 
-        # outputNetwork['conv1_2'] = ConvLayer(outputNetwork['conv1_1'], 512, 3, pad=1)
-        # print "conv1_2: {}".format(outputNetwork['conv1_2'].output_shape[1:])
+        inputNetwork['uconv4_3'] = ConvLayer(inputNetwork['uconv5_1'], 512, 3, pad=1)
+        print "uconv4_3: {}".format(inputNetwork['uconv4_3'].output_shape[1:])
 
-        outputNetwork['conv2_1'] = ConvLayer(outputNetwork['conv1_1'], 256, 3, pad=1)
-        print "conv2_1: {}".format(outputNetwork['conv2_1'].output_shape[1:])
+        inputNetwork['uconv4_2'] = ConvLayer(inputNetwork['uconv4_3'], 512, 3, pad=1)
+        print "uconv4_2: {}".format(inputNetwork['uconv4_2'].output_shape[1:])
 
-        # outputNetwork['conv2_2'] = ConvLayer(outputNetwork['conv2_1'], 256, 3, pad=1)
-        # print "conv2_2: {}".format(outputNetwork['conv2_2'].output_shape[1:])
+        inputNetwork['uconv4_1'] = ConvLayer(inputNetwork['uconv4_2'], 512, 3, pad=1)
+        print "uconv4_1: {}".format(inputNetwork['uconv4_1'].output_shape[1:])
 
-        outputNetwork['conv3_1'] = ConvLayer(outputNetwork['conv2_1'], 128, 3, pad=1)
-        print "conv3_1: {}".format(outputNetwork['conv3_1'].output_shape[1:])
+        # inputNetwork['upool3'] = TransposedConv2DLayer(inputNetwork['uconv4_1'], 512, 2, stride=2)
+        # print "upool3: {}".format(inputNetwork['upool3'].output_shape[1:])
 
-        # outputNetwork['conv3_2'] = ConvLayer(outputNetwork['conv3_1'], 128, 3, pad=1)
-        # print "conv3_2: {}".format(outputNetwork['conv3_2'].output_shape[1:])
+        inputNetwork['uconv3_3'] = ConvLayer(inputNetwork['uconv4_1'], 256, 3, pad=1)
+        print "uconv3_3: {}".format(inputNetwork['uconv3_3'].output_shape[1:])
 
-        outputNetwork['upool3'] = Upscale2DLayer(outputNetwork['conv3_1'], scale_factor=4)
-        print "upool3: {}".format(outputNetwork['upool3'].output_shape[1:])
+        inputNetwork['uconv3_2'] = ConvLayer(inputNetwork['uconv3_3'], 256, 3, pad=1)
+        print "uconv3_2: {}".format(inputNetwork['uconv3_2'].output_shape[1:])
 
-        outputNetwork['conv4'] = ConvLayer(outputNetwork['upool3'], 64, 3, pad=1)
-        print "conv4: {}".format(outputNetwork['conv4'].output_shape[1:])
+        inputNetwork['uconv3_1'] = ConvLayer(inputNetwork['uconv3_2'], 256, 3, pad=1)
+        print "uconv3_1: {}".format(inputNetwork['uconv3_1'].output_shape[1:])
 
-        outputNetwork['conv5'] = ConvLayer(outputNetwork['conv4'], 32, 3, pad=1)
-        print "conv5: {}".format(outputNetwork['conv5'].output_shape[1:])
+        inputNetwork['upool2'] = TransposedConv2DLayer(inputNetwork['uconv3_1'], 256, 2, stride=2)
+        print "upool2: {}".format(inputNetwork['upool2'].output_shape[1:])
 
-        outputNetwork['output'] = ConvLayer(outputNetwork['conv5'], 1, 1, pad=0)
-        print "output: {}".format(outputNetwork['output'].output_shape[1:])
+        inputNetwork['uconv2_2'] = ConvLayer(inputNetwork['upool2'], 128, 3, pad=1)
+        print "uconv2_2: {}".format(inputNetwork['uconv2_2'].output_shape[1:])
 
-        return outputNetwork
+        inputNetwork['uconv2_1'] = ConvLayer(inputNetwork['uconv2_2'], 128, 3, pad=1)
+        print "uconv2_1: {}".format(inputNetwork['uconv2_1'].output_shape[1:])
+
+        inputNetwork['upool1'] = TransposedConv2DLayer(inputNetwork['uconv2_1'], 128, 2, stride=2)
+        print "upool1: {}".format(inputNetwork['upool1'].output_shape[1:])
+
+        inputNetwork['uconv1_2'] = ConvLayer(inputNetwork['upool1'], 64, 3, pad=1)
+        print "uconv1_2: {}".format(inputNetwork['uconv1_2'].output_shape[1:])
+
+        inputNetwork['uconv1_1'] = ConvLayer(inputNetwork['uconv1_2'], 64, 3, pad=1)
+        print "uconv1_1: {}".format(inputNetwork['uconv1_1'].output_shape[1:])
+
+        inputNetwork['output'] = ConvLayer(inputNetwork['uconv1_1'], 1, 1, pad=0)
+        print "output: {}".format(inputNetwork['output'].output_shape[1:])
+
+        return inputNetwork
+
+    def buildOutputNetwork_D(self, input_stage):
+        inputNetwork = {}
+
+        inputNetwork['uconv5_3'] = ConvLayer(input_stage, 512, 3, pad=1)
+        print "uconv5_3: {}".format(inputNetwork['uconv5_3'].output_shape[1:])
+
+        inputNetwork['uconv5_2'] = ConvLayer(inputNetwork['uconv5_3'], 512, 3, pad=1)
+        print "uconv5_2: {}".format(inputNetwork['uconv5_2'].output_shape[1:])
+
+        inputNetwork['uconv5_1'] = ConvLayer(inputNetwork['uconv5_2'], 512, 3, pad=1)
+        print "uconv5_1: {}".format(inputNetwork['uconv5_1'].output_shape[1:])
+
+        inputNetwork['upool4'] = TransposedConv2DLayer(inputNetwork['uconv5_1'], 512, 2, stride=2)
+        print "upool4: {}".format(inputNetwork['upool4'].output_shape[1:])
+
+        inputNetwork['uconv4_3'] = ConvLayer(inputNetwork['upool4'], 512, 3, pad=1)
+        print "uconv4_3: {}".format(inputNetwork['uconv4_3'].output_shape[1:])
+
+        inputNetwork['uconv4_2'] = ConvLayer(inputNetwork['uconv4_3'], 512, 3, pad=1)
+        print "uconv4_2: {}".format(inputNetwork['uconv4_2'].output_shape[1:])
+
+        inputNetwork['uconv4_1'] = ConvLayer(inputNetwork['uconv4_2'], 512, 3, pad=1)
+        print "uconv4_1: {}".format(inputNetwork['uconv4_1'].output_shape[1:])
+
+        inputNetwork['upool3'] = TransposedConv2DLayer(inputNetwork['uconv4_1'], 512, 2, stride=2)
+        print "upool3: {}".format(inputNetwork['upool3'].output_shape[1:])
+
+        inputNetwork['uconv3_3'] = ConvLayer(inputNetwork['upool3'], 256, 3, pad=1)
+        print "uconv3_3: {}".format(inputNetwork['uconv3_3'].output_shape[1:])
+
+        inputNetwork['uconv3_2'] = ConvLayer(inputNetwork['uconv3_3'], 256, 3, pad=1)
+        print "uconv3_2: {}".format(inputNetwork['uconv3_2'].output_shape[1:])
+
+        inputNetwork['uconv3_1'] = ConvLayer(inputNetwork['uconv3_2'], 256, 3, pad=1)
+        print "uconv3_1: {}".format(inputNetwork['uconv3_1'].output_shape[1:])
+
+        inputNetwork['upool2'] = TransposedConv2DLayer(inputNetwork['uconv3_1'], 256, 2, stride=2)
+        print "upool2: {}".format(inputNetwork['upool2'].output_shape[1:])
+
+        inputNetwork['uconv2_2'] = ConvLayer(inputNetwork['upool2'], 128, 3, pad=1)
+        print "uconv2_2: {}".format(inputNetwork['uconv2_2'].output_shape[1:])
+
+        inputNetwork['uconv2_1'] = ConvLayer(inputNetwork['uconv2_2'], 128, 3, pad=1)
+        print "uconv2_1: {}".format(inputNetwork['uconv2_1'].output_shape[1:])
+
+        inputNetwork['upool1'] = TransposedConv2DLayer(inputNetwork['uconv2_1'], 128, 2, stride=2)
+        print "upool1: {}".format(inputNetwork['upool1'].output_shape[1:])
+
+        inputNetwork['uconv1_2'] = ConvLayer(inputNetwork['upool1'], 64, 3, pad=1)
+        print "uconv1_2: {}".format(inputNetwork['uconv1_2'].output_shape[1:])
+
+        inputNetwork['uconv1_1'] = ConvLayer(inputNetwork['uconv1_2'], 64, 3, pad=1)
+        print "uconv1_1: {}".format(inputNetwork['uconv1_1'].output_shape[1:])
+
+        inputNetwork['output'] = ConvLayer(inputNetwork['uconv1_1'], 1, 1, pad=0)
+        print "output: {}".format(inputNetwork['output'].output_shape[1:])
+
+        return inputNetwork
 
     def build(self, input_var, output_var):
         input_layer = InputLayer((None, 3, self.inputHeight, self.inputWidth), input_var=input_var);
 
         vggNet = self.buildInputNetwork_VGG_ImageNet(input_layer, input_var)
 
-        vggNet_faces = self.buildInputNetwork_VGG_Faces(input_layer, input_var)
+        # vggNet_faces = self.buildInputNetwork_VGG_Faces(input_layer, input_var)
 
         vggNet_places = self.buildInputNetwork_VGG_Places(input_layer, input_var)
 
@@ -476,11 +550,11 @@ class Model:
 
         # input_stage = concat((vggNet['conv5_3'], vggNet_faces['conv5_3']), axis=1)
 
-        # input_stage = concat((vggNet['conv5_3'], vggNet_places['conv5_3']),axis=1)
+        input_stage = concat((vggNet['conv5_3'], vggNet_places['conv5_3']),axis=1)
 
-        input_stage = concat((vggNet['conv5_3'], vggNet_places['conv5_3'], vggNet_faces['conv5_3']), axis=1)
+        # input_stage = concat((vggNet['conv5_3'], vggNet_places['conv5_3'], vggNet_faces['conv5_3']), axis=1)
 
-        self.net = self.buildOutputNetwork(input_stage)
+        self.net = self.buildOutputNetwork_S(input_stage)
 
         outputLayerName = 'output'
 
