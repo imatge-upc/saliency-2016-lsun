@@ -36,82 +36,85 @@ class ConvVGGImageNet( ModelInput ):
 		sharedNet[self.netName+'conv1_1'] = ConvLayer(sharedNet[self.netName+'input'], 64, 3, pad=1)
 		sharedNet[self.netName+'conv1_1'].add_param(sharedNet[self.netName+'conv1_1'].W, sharedNet[self.netName+'conv1_1'].W.get_value().shape, trainable=False)
 		sharedNet[self.netName+'conv1_1'].add_param(sharedNet[self.netName+'conv1_1'].b, sharedNet[self.netName+'conv1_1'].b.get_value().shape, trainable=False)
-		print "Input: {}".format(sharedNet[self.netName+'conv1_1'].output_shape[1:])
+		print "conv1_1: {}".format(sharedNet[self.netName+'conv1_1'].output_shape[1:])
 		
 		sharedNet[self.netName+'conv1_2'] = ConvLayer(sharedNet[self.netName+'conv1_1'], 64, 3, pad=1)
 		sharedNet[self.netName+'conv1_2'].add_param(sharedNet[self.netName+'conv1_2'].W, sharedNet[self.netName+'conv1_2'].W.get_value().shape, trainable=False)
 		sharedNet[self.netName+'conv1_2'].add_param(sharedNet[self.netName+'conv1_2'].b, sharedNet[self.netName+'conv1_2'].b.get_value().shape, trainable=False)
-		print "Input: {}".format(sharedNet[self.netName+'conv1_2'].output_shape[1:])
+		print "conv1_2: {}".format(sharedNet[self.netName+'conv1_2'].output_shape[1:])
 		
 		sharedNet[self.netName+'pool1'] = PoolLayer(sharedNet[self.netName+'conv1_2'], 2)
-		print "Input: {}".format(sharedNet[self.netName+'pool1'].output_shape[1:])
+		print "pool1: {}".format(sharedNet[self.netName+'pool1'].output_shape[1:])
 		
 		sharedNet[self.netName+'conv2_1'] = ConvLayer(sharedNet[self.netName+'pool1'], 128, 3, pad=1)
 		sharedNet[self.netName+'conv2_1'].add_param(sharedNet[self.netName+'conv2_1'].W, sharedNet[self.netName+'conv2_1'].W.get_value().shape, trainable=False)
 		sharedNet[self.netName+'conv2_1'].add_param(sharedNet[self.netName+'conv2_1'].b, sharedNet[self.netName+'conv2_1'].b.get_value().shape, trainable=False)
-		print "Input: {}".format(sharedNet[self.netName+'conv2_1'].output_shape[1:])
+		print "conv2_1: {}".format(sharedNet[self.netName+'conv2_1'].output_shape[1:])
 		
 		sharedNet[self.netName+'conv2_2'] = ConvLayer(sharedNet[self.netName+'conv2_1'], 128, 3, pad=1)
 		sharedNet[self.netName+'conv2_2'].add_param(sharedNet[self.netName+'conv2_2'].W, sharedNet[self.netName+'conv2_2'].W.get_value().shape, trainable=False)
 		sharedNet[self.netName+'conv2_2'].add_param(sharedNet[self.netName+'conv2_2'].b, sharedNet[self.netName+'conv2_2'].b.get_value().shape, trainable=False)
-		print "Input: {}".format(sharedNet[self.netName+'conv2_2'].output_shape[1:])
+		print "conv2_2: {}".format(sharedNet[self.netName+'conv2_2'].output_shape[1:])
 		
 		sharedNet[self.netName+'pool2'] = PoolLayer(sharedNet[self.netName+'conv2_2'], 2)
-		print "Input: {}".format(sharedNet[self.netName+'pool2'].output_shape[1:])
+		print "pool2: {}".format(sharedNet[self.netName+'pool2'].output_shape[1:])
 		
 		sharedNet[self.netName+'conv3_1'] = ConvLayer(sharedNet[self.netName+'pool2'], 256, 3, pad=1)
 		sharedNet[self.netName+'conv3_1'].add_param(sharedNet[self.netName+'conv3_1'].W, sharedNet[self.netName+'conv3_1'].W.get_value().shape, trainable=False)
 		sharedNet[self.netName+'conv3_1'].add_param(sharedNet[self.netName+'conv3_1'].b, sharedNet[self.netName+'conv3_1'].b.get_value().shape, trainable=False)
-		print "Input: {}".format(sharedNet[self.netName+'conv3_1'].output_shape[1:])
+		print "conv3_1: {}".format(sharedNet[self.netName+'conv3_1'].output_shape[1:])
 		
 		sharedNet[self.netName+'conv3_2'] = ConvLayer(sharedNet[self.netName+'conv3_1'], 256, 3, pad=1)
 		sharedNet[self.netName+'conv3_2'].add_param(sharedNet[self.netName+'conv3_2'].W, sharedNet[self.netName+'conv3_2'].W.get_value().shape, trainable=False)
 		sharedNet[self.netName+'conv3_2'].add_param(sharedNet[self.netName+'conv3_2'].b, sharedNet[self.netName+'conv3_2'].b.get_value().shape, trainable=False)
-		print "Input: {}".format(sharedNet[self.netName+'conv3_2'].output_shape[1:])
+		print "conv3_2: {}".format(sharedNet[self.netName+'conv3_2'].output_shape[1:])
 		
 		sharedNet[self.netName+'conv3_3'] = ConvLayer(sharedNet[self.netName+'conv3_2'], 256, 3, pad=1)
 		sharedNet[self.netName+'conv3_3'].add_param(sharedNet[self.netName+'conv3_3'].W, sharedNet[self.netName+'conv3_3'].W.get_value().shape, trainable=False)
 		sharedNet[self.netName+'conv3_3'].add_param(sharedNet[self.netName+'conv3_3'].b, sharedNet[self.netName+'conv3_3'].b.get_value().shape, trainable=False)
-		print "Input: {}".format(sharedNet[self.netName+'conv3_3'].output_shape[1:])
+		print "conv3_3: {}".format(sharedNet[self.netName+'conv3_3'].output_shape[1:])
 		
 		sharedNet[self.netName+'pool3'] = PoolLayer(sharedNet[self.netName+'conv3_3'], 2)
-		print "Input: {}".format(sharedNet[self.netName+'pool3'].output_shape[1:])
+		print "pool3: {}".format(sharedNet[self.netName+'pool3'].output_shape[1:])
 		
 		sharedNet[self.netName+'conv4_1'] = ConvLayer(sharedNet[self.netName+'pool3'], 512, 3, pad=1)
 		sharedNet[self.netName+'conv4_1'].add_param(sharedNet[self.netName+'conv4_1'].W, sharedNet[self.netName+'conv4_1'].W.get_value().shape, trainable=False)
 		sharedNet[self.netName+'conv4_1'].add_param(sharedNet[self.netName+'conv4_1'].b, sharedNet[self.netName+'conv4_1'].b.get_value().shape, trainable=False)
-		print "Input: {}".format(sharedNet[self.netName+'conv4_1'].output_shape[1:])
+		print "conv4_1: {}".format(sharedNet[self.netName+'conv4_1'].output_shape[1:])
 		
 		sharedNet[self.netName+'conv4_2'] = ConvLayer(sharedNet[self.netName+'conv4_1'], 512, 3, pad=1)
 		sharedNet[self.netName+'conv4_2'].add_param(sharedNet[self.netName+'conv4_2'].W, sharedNet[self.netName+'conv4_2'].W.get_value().shape, trainable=False)
 		sharedNet[self.netName+'conv4_2'].add_param(sharedNet[self.netName+'conv4_2'].b, sharedNet[self.netName+'conv4_2'].b.get_value().shape, trainable=False)
-		print "Input: {}".format(sharedNet[self.netName+'conv4_2'].output_shape[1:])
+		print "conv4_2: {}".format(sharedNet[self.netName+'conv4_2'].output_shape[1:])
 		
 		sharedNet[self.netName+'conv4_3'] = ConvLayer(sharedNet[self.netName+'conv4_2'], 512, 3, pad=1)
 		sharedNet[self.netName+'conv4_3'].add_param(sharedNet[self.netName+'conv4_3'].W, sharedNet[self.netName+'conv3_1'].W.get_value().shape, trainable=False)
 		sharedNet[self.netName+'conv4_3'].add_param(sharedNet[self.netName+'conv4_3'].b, sharedNet[self.netName+'conv4_3'].b.get_value().shape, trainable=False)
-		print "Input: {}".format(sharedNet[self.netName+'conv4_3'].output_shape[1:])
+		print "conv4_3: {}".format(sharedNet[self.netName+'conv4_3'].output_shape[1:])
 		
 		sharedNet[self.netName+'pool4'] = PoolLayer(sharedNet[self.netName+'conv4_3'], 2)
-		print "Input: {}".format(sharedNet[self.netName+'pool4'].output_shape[1:])
+		print "pool4: {}".format(sharedNet[self.netName+'pool4'].output_shape[1:])
 		
 		sharedNet[self.netName+'conv5_1'] = ConvLayer(sharedNet[self.netName+'pool4'], 512, 3, pad=1)
 		sharedNet[self.netName+'conv5_1'].add_param(sharedNet[self.netName+'conv5_1'].W, sharedNet[self.netName+'conv5_1'].W.get_value().shape, trainable=False)
 		sharedNet[self.netName+'conv5_1'].add_param(sharedNet[self.netName+'conv5_1'].b, sharedNet[self.netName+'conv5_1'].b.get_value().shape, trainable=False)
-		print "Input: {}".format(sharedNet[self.netName+'conv5_1'].output_shape[1:])
+		print "conv5_1: {}".format(sharedNet[self.netName+'conv5_1'].output_shape[1:])
 		
 		sharedNet[self.netName+'conv5_2'] = ConvLayer(sharedNet[self.netName+'conv5_1'], 512, 3, pad=1)
 		sharedNet[self.netName+'conv5_2'].add_param(sharedNet[self.netName+'conv5_2'].W, sharedNet[self.netName+'conv5_2'].W.get_value().shape, trainable=False)
 		sharedNet[self.netName+'conv5_2'].add_param(sharedNet[self.netName+'conv5_2'].b, sharedNet[self.netName+'conv5_2'].b.get_value().shape, trainable=False)
-		print "Input: {}".format(sharedNet[self.netName+'conv5_2'].output_shape[1:])
+		print "conv5_2: {}".format(sharedNet[self.netName+'conv5_2'].output_shape[1:])
 		
 		sharedNet[self.netName+'conv5_3'] = ConvLayer(sharedNet[self.netName+'conv5_2'], 512, 3, pad=1)
 		sharedNet[self.netName+'conv5_3'].add_param(sharedNet[self.netName+'conv5_3'].W, sharedNet[self.netName+'conv5_3'].W.get_value().shape, trainable=False)
 		sharedNet[self.netName+'conv5_3'].add_param(sharedNet[self.netName+'conv5_3'].b, sharedNet[self.netName+'conv5_3'].b.get_value().shape, trainable=False)
-		print "Input: {}".format(sharedNet[self.netName+'conv5_3'].output_shape[1:])
+		print "conv5_3: {}".format(sharedNet[self.netName+'conv5_3'].output_shape[1:])
 		
-		sharedNet[self.netName+'output'] = PoolLayer(sharedNet[self.netName+'conv5_3'], 2)
-		print "Input: {}".format(sharedNet[self.netName+'output'].output_shape[1:])
+		sharedNet[self.netName+'pool5'] = PoolLayer(sharedNet[self.netName+'conv5_3'], 2)
+		print "pool5: {}".format(sharedNet[self.netName+'pool5'].output_shape[1:])
+		
+		sharedNet[self.netName+'output'] = sharedNet[self.netName+'pool5']
+		print "output: {}".format(sharedNet[self.netName+'output'].output_shape[1:])
 		
 		self.outputLayerName = self.netName+'output'
 		

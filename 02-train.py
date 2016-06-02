@@ -10,7 +10,7 @@ import time
 from tqdm import tqdm
 from eliaLib import dataRepresentation
 import matplotlib.pyplot as plt
-from models import ConvVGGPlaces, ConvVGGFaces, ConvVGGImageNet
+from models import ConvVGGPlacesUpsample, ConvVGGFacesUpsample, ConvVGGImageNetUpsample
 
 import theano
 import theano.tensor as T
@@ -59,25 +59,22 @@ if __name__ == "__main__":
 
 	
 	# Create network PLACES
-	inputImagePlaces = T.tensor4()
-	networkPlaces = OrderedDict()
-	inputPlaces = ConvVGGPlaces.ConvVGGPlaces(inputWidth,inputHeight)
-	inputPlaces.build( networkPlaces, inputImagePlaces )
-	inputPlaces.load( 'ConvVGG_Places.pkl', networkPlaces)
+	inputImageImageNet = T.tensor4()
+	networkImageNet = OrderedDict()
+	inputImageNet = ConvVGGImageNetUpsample.ConvVGGImageNetUpsample(inputWidth,inputHeight)
+	inputImageNet.build( networkImageNet, 'ConvVGG_ImageNet.pkl', inputImageImageNet )
 	
 	# Create network FACES
 	inputImageFace = T.tensor4()
 	networkFaces = OrderedDict()
-	inputFaces = ConvVGGFaces.ConvVGGFaces(inputWidth,inputHeight)
-	inputFaces.build( networkFaces, inputImageFace )
-	inputFaces.load( 'ConvVGG_Faces.pkl', networkFaces)
-	
+	inputFaces = ConvVGGFacesUpsample.ConvVGGFacesUpsample(inputWidth,inputHeight)
+	inputFaces.build( networkFaces,'ConvVGG_Faces.pkl', inputImageFace )	
+
 	# Create network ImageNet
-	inputImageImageNet = T.tensor4()
-	networkImageNet = OrderedDict()
-	inputImageNet = ConvVGGImageNet.ConvVGGImageNet(inputWidth,inputHeight)
-	inputImageNet.build( networkImageNet, inputImageImageNet )
-	inputImageNet.load( 'ConvVGG_ImageNet.pkl', networkImageNet )
+	inputImagePlaces = T.tensor4()
+	networkPlaces = OrderedDict()
+	inputPlaces = ConvVGGPlacesUpsample.ConvVGGPlacesUpsample(inputWidth,inputHeight)
+	inputPlaces.build( networkPlaces, 'ConvVGG_Places.pkl', inputImagePlaces )	
 	
 	# Merge networks in a common OrderedDict
 	inputNetwork = networkPlaces.copy()
@@ -89,66 +86,14 @@ if __name__ == "__main__":
 	
 	# Concat inputs
 	inputNetwork['concat'] = lasagne.layers.ConcatLayer([inputNetwork[inputPlaces.outputLayerName],\
-                                                     inputNetwork[inputFaces.outputLayerName],\
-                                                     inputNetwork[inputImageNet.outputLayerName]], axis=1)
+														 inputNetwork[inputFaces.outputLayerName],\
+														 inputNetwork[inputImageNet.outputLayerName]], axis=1)
+	print "Output: {}".format(inputNetwork['concat'].output_shape[1:])
+
 	
 	# Deconvolutional part
-	inputNetwork['upool5'] = Upscale2DLayer(inputNetwork['concat'], scale_factor=2)
-	print "upool5: {}".format(inputNetwork['upool5'].output_shape[1:])
-
-	inputNetwork['uconv5_3'] = ConvLayer(inputNetwork['upool5'], 512, 3, pad=1)
-	print "uconv5_3: {}".format(inputNetwork['uconv5_3'].output_shape[1:])
-
-	inputNetwork['uconv5_2'] = ConvLayer(inputNetwork['uconv5_3'], 512, 3, pad=1)
-	print "uconv5_2: {}".format(inputNetwork['uconv5_2'].output_shape[1:])
-
-	inputNetwork['uconv5_1'] = ConvLayer(inputNetwork['uconv5_2'], 512, 3, pad=1)
-	print "uconv5_1: {}".format(inputNetwork['uconv5_1'].output_shape[1:])
-
-	inputNetwork['upool4'] = Upscale2DLayer(inputNetwork['uconv5_1'], scale_factor=2)
-	print "upool4: {}".format(inputNetwork['upool4'].output_shape[1:])
-
-	inputNetwork['uconv4_3'] = ConvLayer(inputNetwork['upool4'], 512, 3, pad=1)
-	print "uconv4_3: {}".format(inputNetwork['uconv4_3'].output_shape[1:])
-
-	inputNetwork['uconv4_2'] = ConvLayer(inputNetwork['uconv4_3'], 512, 3, pad=1)
-	print "uconv4_2: {}".format(inputNetwork['uconv4_2'].output_shape[1:])
-
-	inputNetwork['uconv4_1'] = ConvLayer(inputNetwork['uconv4_2'], 512, 3, pad=1)
-	print "uconv4_1: {}".format(inputNetwork['uconv4_1'].output_shape[1:])
-
-	inputNetwork['upool3'] = Upscale2DLayer(inputNetwork['uconv4_1'], scale_factor=2)
-	print "upool3: {}".format(inputNetwork['upool3'].output_shape[1:])
-
-	inputNetwork['uconv3_3'] = ConvLayer(inputNetwork['upool3'], 256, 3, pad=1)
-	print "uconv3_3: {}".format(inputNetwork['uconv3_3'].output_shape[1:])
-
-	inputNetwork['uconv3_2'] = ConvLayer(inputNetwork['uconv3_3'], 256, 3, pad=1)
-	print "uconv3_2: {}".format(inputNetwork['uconv3_2'].output_shape[1:])
-
-	inputNetwork['uconv3_1'] = ConvLayer(inputNetwork['uconv3_2'], 256, 3, pad=1)
-	print "uconv3_1: {}".format(inputNetwork['uconv3_1'].output_shape[1:])
-
-	inputNetwork['upool2'] = Upscale2DLayer(inputNetwork['uconv3_1'], scale_factor=2)
-	print "upool2: {}".format(inputNetwork['upool2'].output_shape[1:])
-
-	inputNetwork['uconv2_2'] = ConvLayer(inputNetwork['upool2'], 128, 3, pad=1)
-	print "uconv2_2: {}".format(inputNetwork['uconv2_2'].output_shape[1:])
-
-	inputNetwork['uconv2_1'] = ConvLayer(inputNetwork['uconv2_2'], 128, 3, pad=1)
-	print "uconv2_1: {}".format(inputNetwork['uconv2_1'].output_shape[1:])
-
-	inputNetwork['upool1'] = Upscale2DLayer(inputNetwork['uconv2_1'], scale_factor=2)
-	print "upool1: {}".format(inputNetwork['upool1'].output_shape[1:])
-
-	inputNetwork['uconv1_2'] = ConvLayer(inputNetwork['upool1'], 64, 3, pad=1)
-	print "uconv1_2: {}".format(inputNetwork['uconv1_2'].output_shape[1:])
-
-	inputNetwork['uconv1_1'] = ConvLayer(inputNetwork['uconv1_2'], 64, 3, pad=1)
-	print "uconv1_1: {}".format(inputNetwork['uconv1_1'].output_shape[1:])
-
-	inputNetwork['output'] = ConvLayer(inputNetwork['uconv1_1'], 1, 1, pad=0)
-	print "output: {}".format(inputNetwork['output'].output_shape[1:])    
+	inputNetwork['output'] = Upscale2DLayer( ConvLayer(inputNetwork['concat'], 1, 3, pad = 1), scale_factor=4 )
+	print "Output: {}".format(inputNetwork['output'].output_shape[1:]) 
 	
 	# Compile functions
 	outputSaliency = T.tensor4()
@@ -174,7 +119,7 @@ if __name__ == "__main__":
 
 	trainFunction = theano.function([inputImagePlaces, inputImageFace, inputImageImageNet, outputSaliency],\
 									loss, updates=updates, allow_input_downcast=True)
-
+		
 	predictFunction = theano.function([inputImagePlaces,inputImageFace,inputImageImageNet], test_prediction)
 
 	# Data structures to hold batches
@@ -185,22 +130,25 @@ if __name__ == "__main__":
 
 	for currEpoch in tqdm(range(numEpochs), ncols=20):
 		
+		startTime = time.time()
+		
 		random.shuffle( trainData )
 
 		err = 0.
 		numBatches = 0.
 		
-		for currChunk in chunks(trainData, batchSize):
+		for currChunk in tqdm(chunks(trainData, batchSize), ncols=30, total=len(trainData)/batchSize):
 
 			if len(currChunk) != batchSize:
 				continue
 
-			for k in range( batchSize ):
-				batchInPlaces[k,...] = ( trainData[k].image.data.astype( theano.config.floatX ).transpose(2,0,1) - inputPlaces.meanImage )
-				batchInFaces[k,...] = ( trainData[k].image.data.astype( theano.config.floatX ).transpose(2,0,1) - inputFaces.meanImage )
-				batchInImageNet[k,...] = ( trainData[k].image.data.astype( theano.config.floatX ).transpose(2,0,1) - inputImageNet.meanImage )
-				batchOut[k,...] = (trainData[k].saliency.data.astype(theano.config.floatX))/255.
+			for k, dataElement in enumerate( currChunk ):
+				batchInPlaces[k,...] = ( dataElement.image.data.astype( theano.config.floatX ).transpose(2,0,1) - inputPlaces.meanImage )
+				batchInFaces[k,...] = ( dataElement.image.data.astype( theano.config.floatX ).transpose(2,0,1) - inputFaces.meanImage )
+				batchInImageNet[k,...] = ( dataElement.image.data.astype( theano.config.floatX ).transpose(2,0,1) - inputImageNet.meanImage )
+				batchOut[k,...] = (dataElement.saliency.data.astype(theano.config.floatX))/255.
 			err += trainFunction( batchInPlaces, batchInFaces, batchInImageNet, batchOut )
 			
 		print 'Epoch:', currEpoch, ' ->', err 
-		np.savez( "modelWights{:04d}.npz".format(currEpoch), *lasagne.layers.get_all_param_values(model.net['output']))
+		print '-- Took ', time.time() - startTime, ' seconds'
+		np.savez( "modelWights{:04d}.npz".format(currEpoch), *lasagne.layers.get_all_param_values(inputNetwork['output']))
