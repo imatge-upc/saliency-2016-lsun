@@ -2,3 +2,4 @@
 *.cPickle
 *.pickle
 *.ipynb
+*.pyc
