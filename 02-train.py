@@ -118,6 +118,9 @@ def chunks(l, n):
         yield l[i:i + n]
 
 
+
+        
+
 def train_gan():
     """
     Train both generator and discriminator
@@ -141,8 +144,8 @@ def train_gan():
     batchSize = 32
     numEpochs = 301
 
-    # batchIn = np.zeros((batchSize, 3, model.inputHeight, model.inputWidth), theano.config.floatX)
-    # batchOut = np.zeros((batchSize, 1, model.inputHeight, model.inputWidth), theano.config.floatX)
+    batchIn = np.zeros((batchSize, 3, model.inputHeight, model.inputWidth), theano.config.floatX)
+    batchOut = np.zeros((batchSize, 1, model.inputHeight, model.inputWidth), theano.config.floatX)
     # batchFake = np.zeros((batchSize, 1, model.inputHeight, model.inputWidth), theano.config.floatX)
 
     # Load data
@@ -189,12 +192,24 @@ def train_gan():
 
             # fakeChunk = currChunk
             # random.shuffle(fakeChunk)
+            
+            for k, dataElement in enumerate( currChunk ):
 
-            batchIn = np.asarray([x.image.data.astype(theano.config.floatX).transpose(2, 0, 1) for x in currChunk],
-                                 dtype=theano.config.floatX)
-            batchOut = np.asarray([y.saliency.data.astype(theano.config.floatX) / 255. for y in currChunk],
-                                  dtype=theano.config.floatX)
-            batchOut = np.expand_dims(batchOut, axis=1)
+                currImg = dataElement.image.data.astype(theano.config.floatX).transpose(2, 0, 1)
+                currSaliency = dataElement.saliency.data.astype(theano.config.floatX) / 255.
+                
+                # Do augmentation!
+                if random.choice([True,False]):
+                    currImg = np.fliplr( currImg )
+                    currSaliency = np.fliplr( currSaliency )
+                ## End augmentation
+
+                batchIn[k,...] = currImg
+                batchOut[k,...] = currSaliency
+                
+                #batchOut[k,...] = np.expand_dims(batchOut, axis=1)
+                
+                
 
             # train generator with one batch and discriminator with next batch
             if n_updates % 2 == 0:
